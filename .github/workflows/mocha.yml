@@ -1,6 +1,10 @@
 name: Tests
-'on':
+on:
   push:
+    branches:
+      - '**'
+    tags-ignore:
+      - '**'
   pull_request:
     types:
       - opened
@@ -25,10 +29,9 @@ jobs:
           - ubuntu-latest
           - windows-2019
         node:
-          - 10
           - 12
           - 14
-          - 15
+          - 16
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
@@ -70,10 +73,9 @@ jobs:
           - ubuntu-latest
           - windows-2019
         node:
-          - 10
           - 12
           - 14
-          - 15
+          - 16
         include:
           - os: ubuntu-latest
             node: 14
@@ -174,6 +176,8 @@ jobs:
     needs: smoke
     timeout-minutes: 20
     runs-on: ubuntu-latest
+    # Run 'push' event only because of sauce labs token
+    if: github.event_name == 'push'
     steps:
       - uses: actions/setup-node@v2
         with:

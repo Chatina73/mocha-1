@@ -1,23 +1,12 @@
 /**
- * Mocha's Karma config.
+ * Mocha's Karma config for modern browsers.
  *
- * IMPORTANT:
- * - Karma must _always_ be run with `NODE_PATH=.` where `.` is the project
- *   root; this allows `karma-mocha` to use our built version of Mocha
- * - You must build Mocha's browser bundle before running Karma. This is
- *   typically done automatically in `package-scripts.js`.
+ * Copy of "./karma.config.js"
  *
- * There are actually several different configurations here depending on the
- * values of various environment variables (e.g., `MOCHA_TEST`, `CI`, etc.),
- * which is why it's so hairy.
- *
- * This code avoids mutating the configuration object (the `cfg` variable)
- * directly; instead, we create new objects/arrays. This makes it a little more
- * obvious what's happening, even though it's verbose.
- *
- * The main export is a function which Karma calls with a config object; the
- * final line of this function should be `config.set(cfg)` which registers the
- * configuration we've built.
+ * Changelog:
+ * - remove IE11 out of SAUCE_BROWSER_PLATFORM_MAP
+ * - no sourcemap
+ * - configFile: 'rollup_no-ie11.config.js'
  */
 
 'use strict';
@@ -29,15 +18,14 @@ const BASE_BUNDLE_DIR_PATH = path.join(__dirname, '.karma');
 const env = process.env;
 const hostname = os.hostname();
 
-if (fs.existsSync('./mocha.js') && fs.existsSync('./mocha-es5.js')) {
-  fs.renameSync('./mocha.js', './mocha-es2018.js');
-  fs.renameSync('./mocha-es5.js', './mocha.js');
+if (fs.existsSync('./mocha.js') && fs.existsSync('./mocha-es2018.js')) {
+  fs.renameSync('./mocha.js', './mocha-es5.js');
+  fs.renameSync('./mocha-es2018.js', './mocha.js');
 }
 
 const SAUCE_BROWSER_PLATFORM_MAP = {
   'chrome@latest': 'Windows 10',
   'MicrosoftEdge@latest': 'Windows 10',
-  'internet explorer@latest': 'Windows 10',
   'firefox@latest': 'Windows 10',
   'safari@latest': 'macOS 10.13'
 };
@@ -57,7 +45,7 @@ const baseConfig = {
     rollupPlugin
   ],
   rollup: {
-    configFile: 'rollup.config.js',
+    configFile: 'rollup_no-ie11.config.js',
     include: ['test/**']
   },
   reporters: ['mocha'],
@@ -119,12 +107,6 @@ module.exports = config => {
   cfg = createBundleDir(cfg, bundleDirPath);
   cfg = addSauceTests(cfg, sauceConfig);
   cfg = chooseTestSuite(cfg, env.MOCHA_TEST);
-
-  // include sourcemap
-  cfg = {
-    ...cfg,
-    files: [...cfg.files, {pattern: './mocha.js.map', included: false}]
-  };
 
   config.set(cfg);
 };
